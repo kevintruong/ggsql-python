@@ -49,6 +49,7 @@ AltairChart = Union[
 
 def _json_to_altair_chart(vegalite_json: str, **kwargs: Any) -> AltairChart:
     """Convert a Vega-Lite JSON string to the appropriate Altair chart type."""
+    kwargs.setdefault("validate", False)
     spec = json.loads(vegalite_json)
 
     if "layer" in spec:
@@ -94,7 +95,8 @@ class VegaLiteWriter:
             The resolved visualization specification from ``reader.execute()``.
         **kwargs
             Additional keyword arguments passed to ``altair.Chart.from_json()``.
-            Common options include ``validate=False`` to skip schema validation.
+            Vega-Lite schema validation is disabled by default; pass
+            ``validate=True`` to re-enable it.
 
         Returns
         -------
@@ -121,7 +123,8 @@ def render_altair(
         VISUALISE spec string (e.g., "VISUALISE x, y DRAW point")
     **kwargs
         Additional keyword arguments passed to `from_json()`.
-        Common options include `validate=False` to skip schema validation.
+        Vega-Lite schema validation is disabled by default; pass
+        `validate=True` to re-enable it.
 
     Returns
     -------

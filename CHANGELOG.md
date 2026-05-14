@@ -1,10 +1,16 @@
 # Changelog
 
-## 0.3.0 (unreleased)
+## 0.3.2 (unreleased)
 
 ### Changed
 
-- Upgraded to ggsql Rust crate v0.3.0. See the [upstream changelog](https://github.com/posit-dev/ggsql/blob/main/CHANGELOG.md) for details on new features, bug fixes, and breaking changes.
+- `render_altair()` and `VegaLiteWriter.render_chart()` now default to `validate=False` when creating Altair chart objects. This avoids `ValidationError`s for valid specs (e.g., boxplots) that use Vega-Lite features not yet reflected in Altair's schema. Pass `validate=True` to re-enable.
+
+## 0.3.1
+
+### Changed
+
+- Upgraded to ggsql Rust crate v0.3.1.
 - Replaced polars with Arrow (via pyarrow) for the Rust↔Python data bridge. `DuckDBReader.execute_sql()`, `Spec.data()`, `Spec.layer_data()`, and `Spec.stat_data()` now return `pyarrow.Table` instead of `polars.DataFrame`. `DuckDBReader.register()` accepts `pyarrow.Table` (polars DataFrames are still accepted via automatic conversion). Custom readers returning polars DataFrames from `execute_sql()` continue to work without changes.
 - Runtime dependency changed from `polars` to `pyarrow`.
 
