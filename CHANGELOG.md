@@ -6,6 +6,7 @@
 
 - Upgraded to ggsql Rust crate v0.3.2.
 - `render_altair()` and `VegaLiteWriter.render_chart()` now default to `validate=False` when creating Altair chart objects. This avoids `ValidationError`s for valid specs (e.g., boxplots) that use Vega-Lite features not yet reflected in Altair's schema. Pass `validate=True` to re-enable.
+- When Altair can't deserialize a spec into the expected chart subclass (e.g., `LayerChart`), the converter now falls back to `altair.Chart` instead of raising. The chart still displays correctly; only Altair-level round-tripping (`.to_dict()`) is lost.
 
 ## 0.3.1
 

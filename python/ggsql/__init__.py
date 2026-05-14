@@ -52,20 +52,27 @@ def _json_to_altair_chart(vegalite_json: str, **kwargs: Any) -> AltairChart:
     kwargs.setdefault("validate", False)
     spec = json.loads(vegalite_json)
 
+    chart_class: type[AltairChart] | None = None
     if "layer" in spec:
-        return altair.LayerChart.from_json(vegalite_json, **kwargs)
+        chart_class = altair.LayerChart
     elif "facet" in spec or "spec" in spec:
-        return altair.FacetChart.from_json(vegalite_json, **kwargs)
+        chart_class = altair.FacetChart
     elif "concat" in spec:
-        return altair.ConcatChart.from_json(vegalite_json, **kwargs)
+        chart_class = altair.ConcatChart
     elif "hconcat" in spec:
-        return altair.HConcatChart.from_json(vegalite_json, **kwargs)
+        chart_class = altair.HConcatChart
     elif "vconcat" in spec:
-        return altair.VConcatChart.from_json(vegalite_json, **kwargs)
+        chart_class = altair.VConcatChart
     elif "repeat" in spec:
-        return altair.RepeatChart.from_json(vegalite_json, **kwargs)
-    else:
-        return altair.Chart.from_json(vegalite_json, **kwargs)
+        chart_class = altair.RepeatChart
+
+    if chart_class is not None:
+        try:
+            return chart_class.from_json(vegalite_json, **kwargs)
+        except Exception:
+            pass
+
+    return altair.Chart.from_json(vegalite_json, **kwargs)
 
 
 class VegaLiteWriter:

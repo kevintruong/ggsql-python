@@ -351,6 +351,49 @@ class TestRenderAltairChartTypeDetection:
         assert isinstance(chart, altair.LayerChart)
 
 
+class TestAltairChartFallback:
+    """Tests for fallback to Chart when a specific Altair type can't parse the spec."""
+
+    def test_layer_fallback_to_chart(self):
+        """Specs with 'layer' fall back to Chart when LayerChart.from_json fails."""
+        from ggsql import _json_to_altair_chart
+
+        spec = json.dumps(
+            {
+                "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                "data": {"values": [{"x": 1, "y": 2}]},
+                "layer": [
+                    {
+                        "mark": "point",
+                        "encoding": {"x": {"field": "x", "type": "quantitative"}},
+                        "not_a_real_property": True,
+                    }
+                ],
+            }
+        )
+        chart = _json_to_altair_chart(spec)
+        assert isinstance(chart, altair.Chart)
+
+    def test_layer_uses_specific_type_when_possible(self):
+        """Specs with 'layer' use LayerChart when parsing succeeds."""
+        from ggsql import _json_to_altair_chart
+
+        spec = json.dumps(
+            {
+                "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                "data": {"values": [{"x": 1, "y": 2}]},
+                "layer": [
+                    {
+                        "mark": "point",
+                        "encoding": {"x": {"field": "x", "type": "quantitative"}},
+                    }
+                ],
+            }
+        )
+        chart = _json_to_altair_chart(spec)
+        assert isinstance(chart, altair.LayerChart)
+
+
 class TestRenderAltairErrorHandling:
     """Tests for error handling in render_altair()."""
 
