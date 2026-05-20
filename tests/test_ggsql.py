@@ -275,6 +275,37 @@ class TestRenderAltairReturnType:
         json_str = chart.to_json()
         assert len(json_str) > 0
 
+    def test_height_width(self):
+        table = pa.table({"x": [1, 2, 3], "y": [10, 20, 30]})
+        chart = ggsql.render_altair(
+            table, "VISUALISE x, y DRAW point", height=300, width=500
+        )
+        chart_dict = chart.to_dict()
+        assert chart_dict["height"] == 300
+        assert chart_dict["width"] == 500
+
+    def test_height_only(self):
+        table = pa.table({"x": [1, 2, 3], "y": [10, 20, 30]})
+        chart = ggsql.render_altair(table, "VISUALISE x, y DRAW point", height=400)
+        chart_dict = chart.to_dict()
+        assert chart_dict["height"] == 400
+
+    def test_default_preserves_ggsql_dimensions(self):
+        table = pa.table({"x": [1, 2, 3], "y": [10, 20, 30]})
+
+        reader = ggsql.DuckDBReader("duckdb://memory")
+        reader.register("__data__", table)
+        spec = reader.execute("SELECT * FROM __data__ VISUALISE x, y DRAW point")
+        raw_spec = json.loads(ggsql.VegaLiteWriter().render(spec))
+
+        chart = ggsql.render_altair(table, "VISUALISE x, y DRAW point")
+        chart_dict = chart.to_dict()
+
+        if "height" in raw_spec:
+            assert chart_dict["height"] == raw_spec["height"]
+        if "width" in raw_spec:
+            assert chart_dict["width"] == raw_spec["width"]
+
 
 class TestRenderAltairChartTypeDetection:
     """Tests for correct Altair chart type detection based on spec structure."""
@@ -638,3 +669,37 @@ class TestVegaLiteWriterRenderChart:
         writer = ggsql.VegaLiteWriter()
         chart = writer.render_chart(spec, validate=False)
         assert isinstance(chart, altair.FacetChart)
+
+    def test_render_chart_height_width(self):
+        """render_chart() injects height/width into the spec when provided."""
+        reader = ggsql.DuckDBReader("duckdb://memory")
+        spec = reader.execute("SELECT 1 AS x, 2 AS y VISUALISE x, y DRAW point")
+        writer = ggsql.VegaLiteWriter()
+        chart = writer.render_chart(spec, height=300, width=500)
+        chart_dict = chart.to_dict()
+        assert chart_dict["height"] == 300
+        assert chart_dict["width"] == 500
+
+    def test_render_chart_height_only(self):
+        """render_chart() can set height without width."""
+        reader = ggsql.DuckDBReader("duckdb://memory")
+        spec = reader.execute("SELECT 1 AS x, 2 AS y VISUALISE x, y DRAW point")
+        writer = ggsql.VegaLiteWriter()
+        chart = writer.render_chart(spec, height=400)
+        chart_dict = chart.to_dict()
+        assert chart_dict["height"] == 400
+
+    def test_render_chart_default_preserves_ggsql_dimensions(self):
+        """When height/width are not specified, ggsql's defaults are preserved."""
+        reader = ggsql.DuckDBReader("duckdb://memory")
+        spec = reader.execute("SELECT 1 AS x, 2 AS y VISUALISE x, y DRAW point")
+        writer = ggsql.VegaLiteWriter()
+
+        raw_spec = json.loads(writer.render(spec))
+        chart = writer.render_chart(spec)
+        chart_dict = chart.to_dict()
+
+        if "height" in raw_spec:
+            assert chart_dict["height"] == raw_spec["height"]
+        if "width" in raw_spec:
+            assert chart_dict["width"] == raw_spec["width"]

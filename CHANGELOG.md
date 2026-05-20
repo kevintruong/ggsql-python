@@ -1,5 +1,11 @@
 # Changelog
 
+## UNRELEASED
+
+### Changed
+
+- `VegaLiteWriter.render_chart()` and `render_altair()` now accept `validate`, `height`, and `width` as explicit keyword arguments. `height` and `width` default to `None`, which preserves whatever dimensions ggsql produces. `validate` defaults to `False` (same behavior as before, now a named parameter).
+
 ## 0.3.2
 
 ### Changed

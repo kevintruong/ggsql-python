@@ -93,17 +93,31 @@ class VegaLiteWriter:
         """Render a Spec to a Vega-Lite JSON string."""
         return self._inner.render(spec)
 
-    def render_chart(self, spec: Spec, **kwargs: Any) -> AltairChart:
+    def render_chart(
+        self,
+        spec: Spec,
+        *,
+        validate: bool = False,
+        height: int | None = None,
+        width: int | None = None,
+        **kwargs: Any,
+    ) -> AltairChart:
         """Render a Spec to an Altair chart object.
 
         Parameters
         ----------
         spec
             The resolved visualization specification from ``reader.execute()``.
+        validate
+            Whether to validate the spec against the Vega-Lite schema.
+        height
+            Chart height in pixels. When ``None`` (the default), the height
+            produced by ggsql is used as-is.
+        width
+            Chart width in pixels. When ``None`` (the default), the width
+            produced by ggsql is used as-is.
         **kwargs
             Additional keyword arguments passed to ``altair.Chart.from_json()``.
-            Vega-Lite schema validation is disabled by default; pass
-            ``validate=True`` to re-enable it.
 
         Returns
         -------
@@ -111,12 +125,23 @@ class VegaLiteWriter:
             An Altair chart object (Chart, LayerChart, FacetChart, etc.).
         """
         vegalite_json = self.render(spec)
-        return _json_to_altair_chart(vegalite_json, **kwargs)
+        if height is not None or width is not None:
+            spec_dict = json.loads(vegalite_json)
+            if height is not None:
+                spec_dict["height"] = height
+            if width is not None:
+                spec_dict["width"] = width
+            vegalite_json = json.dumps(spec_dict)
+        return _json_to_altair_chart(vegalite_json, validate=validate, **kwargs)
 
 
 def render_altair(
     df: IntoFrame,
     viz: str,
+    *,
+    validate: bool = False,
+    height: int | None = None,
+    width: int | None = None,
     **kwargs: Any,
 ) -> AltairChart:
     """Render a DataFrame with a VISUALISE spec to an Altair chart.
@@ -128,10 +153,16 @@ def render_altair(
         DataFrame. LazyFrames are collected automatically.
     viz
         VISUALISE spec string (e.g., "VISUALISE x, y DRAW point")
+    validate
+        Whether to validate the spec against the Vega-Lite schema.
+    height
+        Chart height in pixels. When ``None`` (the default), the height
+        produced by ggsql is used as-is.
+    width
+        Chart width in pixels. When ``None`` (the default), the width
+        produced by ggsql is used as-is.
     **kwargs
-        Additional keyword arguments passed to `from_json()`.
-        Vega-Lite schema validation is disabled by default; pass
-        `validate=True` to re-enable it.
+        Additional keyword arguments passed to ``altair.Chart.from_json()``.
 
     Returns
     -------
@@ -160,4 +191,12 @@ def render_altair(
     writer = VegaLiteWriter()
     vegalite_json = writer.render(spec)
 
-    return _json_to_altair_chart(vegalite_json, **kwargs)
+    if height is not None or width is not None:
+        spec_dict = json.loads(vegalite_json)
+        if height is not None:
+            spec_dict["height"] = height
+        if width is not None:
+            spec_dict["width"] = width
+        vegalite_json = json.dumps(spec_dict)
+
+    return _json_to_altair_chart(vegalite_json, validate=validate, **kwargs)
