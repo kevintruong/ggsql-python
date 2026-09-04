@@ -71,7 +71,7 @@ jobs:
           path: dist
 
   windows:
-    runs-on: windows-latest
+    runs-on: windows-2022
     env:
       # DuckDB 1.10502 requires C++17; MSVC otherwise defaults to C++14.
       CXXFLAGS: /std:c++17
