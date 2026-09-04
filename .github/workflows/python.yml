@@ -46,6 +46,11 @@ jobs:
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1
 
+      - name: Use C++17 for DuckDB (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: echo "CXXFLAGS=/std:c++17" >> "$GITHUB_ENV"
+
       - name: Check Rust formatting
         run: cargo fmt -- --check
 
