@@ -12,6 +12,7 @@ from ggsql._ggsql import (
     VegaLiteWriter as _RustVegaLiteWriter,
     Validated,
     Spec,
+    core_version,
     validate,
     execute,
 )
@@ -29,11 +30,12 @@ __all__ = [
     "Validated",
     "Spec",
     # Functions
+    "core_version",
     "validate",
     "execute",
     "render_altair",
 ]
-__version__ = "0.3.0"
+__version__ = "0.4.1"
 
 # Type alias for any Altair chart type
 AltairChart = Union[

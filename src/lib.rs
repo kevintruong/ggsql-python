@@ -791,6 +791,12 @@ fn execute(query: &str, reader: &Bound<'_, PyAny>) -> PyResult<PySpec> {
 // Module Registration
 // ============================================================================
 
+/// Return the version of the embedded ggsql Rust core.
+#[pyfunction]
+fn core_version() -> &'static str {
+    ggsql::VERSION
+}
+
 #[pymodule]
 fn _ggsql(m: &Bound<'_, PyModule>) -> PyResult<()> {
     // Classes
@@ -800,6 +806,7 @@ fn _ggsql(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PySpec>()?;
 
     // Functions
+    m.add_function(wrap_pyfunction!(core_version, m)?)?;
     m.add_function(wrap_pyfunction!(validate, m)?)?;
     m.add_function(wrap_pyfunction!(execute, m)?)?;
 

@@ -33,6 +33,16 @@ except ImportError:
     HAS_IBIS = False
 
 
+class TestRuntimeIdentity:
+    """Tests that the Python package and embedded Rust core stay aligned."""
+
+    def test_python_package_version_is_0_4_1(self):
+        assert ggsql.__version__ == "0.4.1"
+
+    def test_embedded_core_version_is_0_4_1(self):
+        assert getattr(ggsql, "core_version", lambda: None)() == "0.4.1"
+
+
 class TestValidate:
     """Tests for validate() function."""
 
@@ -59,9 +69,9 @@ class TestValidate:
         assert len(validated.errors()) > 0
 
     def test_missing_required_aesthetic(self):
-        # Point requires x and y, only providing x
+        # Line requires x and y, only providing x
         validated = ggsql.validate(
-            "SELECT 1 AS x, 2 AS y VISUALISE DRAW point MAPPING x AS x"
+            "SELECT 1 AS x, 2 AS y VISUALISE DRAW line MAPPING x AS x"
         )
         assert not validated.valid()
         errors = validated.errors()

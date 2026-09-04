@@ -1,9 +1,9 @@
-name: Python Release
+name: SPUR Python Release
 
 on:
   push:
     tags:
-      - "py/v*"
+      - "spur-v*"
   workflow_dispatch:
 
 permissions:
@@ -106,28 +106,8 @@ jobs:
           name: wheels-sdist
           path: dist
 
-  publish:
-    needs: [linux, macos, windows, sdist]
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
-    environment: pypi
-    permissions:
-      id-token: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: wheels-*
-          merge-multiple: true
-          path: dist
-
-      - name: List wheels
-        run: ls -lh dist/
-
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-
   github-release:
-    needs: publish
+    needs: [linux, macos, windows, sdist]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
     permissions:
